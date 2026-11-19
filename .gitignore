@@ -1,0 +1,18 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+.svelte-kit/
+build/
+dist/
+
+# Local uploads and OS files
+uploads/
+.DS_Store
+Thumbs.db

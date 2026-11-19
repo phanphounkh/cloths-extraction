@@ -1,0 +1,51 @@
+name: sab
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-sab}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # Published on localhost only, so the backend can also run outside Docker.
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-sab}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-sab}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-google/gemini-2.5-flash-image}
+      OPENROUTER_IMAGE_QUALITY: ${OPENROUTER_IMAGE_QUALITY:-}
+      CORS_ORIGINS: http://localhost:${FRONTEND_PORT:-5173},http://127.0.0.1:${FRONTEND_PORT:-5173}
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - image_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      # Used by the browser, so it must be the backend's address on the host.
+      PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-8000}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  image_data:
