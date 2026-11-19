@@ -20,5 +20,5 @@ async def health(db: Annotated[AsyncSession, Depends(get_db)]):
     return {
         "status": "ok",
         "database": "ok",
-        "ai_configured": settings.openrouter_configured,
+        "ai_configured": settings.ai_configured,
     }

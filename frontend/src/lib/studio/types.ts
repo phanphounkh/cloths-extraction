@@ -1,0 +1,21 @@
+export const NODE_WIDTH = 320;
+export const NODE_HEIGHT = 420;
+export const ACCEPTED_IMAGES = ['image/png', 'image/jpeg', 'image/webp'];
+export const GARMENTS = { shirt: 'Shirt / Top', jacket: 'Jacket', dress: 'Dress', pants: 'Pants', skirt: 'Skirt', shoes: 'Shoes', other: 'Other / Multiple' };
+export type Garment = keyof typeof GARMENTS;
+export type Panel = 'canvas' | 'history' | 'assets' | 'settings';
+export type Point = { x: number; y: number };
+export type CanvasNode = Point & {
+  id: string;
+  kind: 'source' | 'result';
+  title: string;
+  url: string;
+  file?: File;
+  sourceId?: string;
+  garment: Garment;
+  instruction: string;
+  status: 'ready' | 'generating' | 'failed';
+  error?: string;
+  startedAt?: number;
+};
+export type Snapshot = { nodes: CanvasNode[]; selectedId: string | null };
