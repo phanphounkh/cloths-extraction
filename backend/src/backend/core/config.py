@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -23,6 +24,15 @@ class Settings(BaseSettings):
     # which reject unknown parameters. For gpt-image it drives the price.
     openrouter_image_quality: str = ""
 
+    # Which backend generates images: "openrouter" (hosted API) or "kaggle"
+    # (a model served over HTTP from a Kaggle notebook GPU; see /kaggle).
+    image_backend: Literal["openrouter", "kaggle"] = "openrouter"
+    # Public URL printed by the notebook (changes every session) and the
+    # shared secret it checks in the Authorization header.
+    kaggle_base_url: str = ""
+    kaggle_api_token: str = ""
+    kaggle_timeout_seconds: float = 300.0
+
     # Comma-separated list of origins allowed to call the API from a browser.
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
@@ -37,6 +47,16 @@ class Settings(BaseSettings):
     @property
     def openrouter_configured(self) -> bool:
         return bool(self.openrouter_api_key) and self.openrouter_api_key != "replace_me"
+
+    @property
+    def kaggle_configured(self) -> bool:
+        return bool(self.kaggle_base_url) and bool(self.kaggle_api_token)
+
+    @property
+    def ai_configured(self) -> bool:
+        if self.image_backend == "kaggle":
+            return self.kaggle_configured
+        return self.openrouter_configured
 
 
 settings = Settings()

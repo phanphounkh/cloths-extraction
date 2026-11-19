@@ -74,5 +74,9 @@ re-encoded (which strips metadata such as GPS location) before being sent to the
 | `OPENROUTER_IMAGE_QUALITY`   | empty (not sent); `low`/`medium`/`high` for OpenAI gpt-image models |
 | `OPENROUTER_BASE_URL`        | `https://openrouter.ai/api/v1`  |
 | `OPENROUTER_TIMEOUT_SECONDS` | `120`                           |
+| `IMAGE_BACKEND`              | `openrouter`; `kaggle` uses the GPU notebook in `kaggle/` |
+| `KAGGLE_BASE_URL`            | empty; public ngrok URL printed by the notebook |
+| `KAGGLE_API_TOKEN`           | empty; the token the notebook was started with |
+| `KAGGLE_TIMEOUT_SECONDS`     | `300`                           |
 | `CORS_ORIGINS`               | `http://localhost:5173,http://127.0.0.1:5173` |
 | `UPLOAD_DIR`                 | `uploads`                       |

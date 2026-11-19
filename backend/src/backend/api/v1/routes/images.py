@@ -10,6 +10,7 @@ from backend.db.session import get_db
 from backend.models.image_job import STATUS_COMPLETED, STATUS_FAILED, ImageJob
 from backend.schemas.image_job import ImageJobOut
 from backend.services.image_service import MAX_UPLOAD_BYTES, encode_png, normalize_upload
+from backend.services.kaggle_service import generate_garment_on_kaggle
 from backend.services.openrouter import generate_garment
 
 router = APIRouter(prefix="/images", tags=["images"])
@@ -45,8 +46,8 @@ async def extract(
     garment: Annotated[Garment, Form()] = "shirt",
     instruction: Annotated[str, Form(max_length=500)] = "",
 ):
-    if not settings.openrouter_configured:
-        raise HTTPException(503, "AI generation is not configured: set OPENROUTER_API_KEY.")
+    if not settings.ai_configured:
+        raise HTTPException(503, "AI generation is not configured for the selected IMAGE_BACKEND.")
 
     # Read one byte past the limit so oversized files are detected
     # without loading arbitrarily large uploads into memory.
@@ -65,7 +66,10 @@ async def extract(
     await db.commit()
 
     try:
-        generated = await generate_garment(normalized, garment, instruction)
+        if settings.image_backend == "kaggle":
+            generated = await generate_garment_on_kaggle(normalized, garment, instruction)
+        else:
+            generated = await generate_garment(normalized, garment, instruction)
         try:
             png = await run_in_threadpool(encode_png, generated)
         except ValueError as exc:
